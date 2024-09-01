@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cabelo Todo Dia</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0e6d2;
+            color: #4a3c31;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background-color: #d4c3a3;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #6d4c41;
+        }
+
+        .menu-icon {
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        .menu {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 300px;
+            height: 100vh;
+            background-color: #e7c69ca4;
+            transition: right 0.3s ease-in-out;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .menu.open {
+            right: 0;
+        }
+
+        .menu a {
+            display: inline-block;
+            margin: 10px;
+            padding: 10px 20px;
+            text-decoration: none;
+            color: #6d4c41;
+            font-weight: bold;
+            border-radius: 20px;
+            background-color: rgba(109, 76, 65, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .menu a:hover {
+            background-color: rgba(109, 76, 65, 0.2);
+            transform: scale(1.05);
+        }
+
+        .pentagon-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 2rem 0;
+        }
+
+        .pentagon {
+            width: 300px;
+            height: 300px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.5s;
+        }
+
+        .face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            border: 2px solid #6d4c41;
+            background-color: #d4c3a3;
+        }
+
+        .face img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+        }
+
+        .expanded-image {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 90vw;
+            max-height: 90vh;
+            z-index: 1000;
+            display: none;
+            border: 2px solid #6d4c41;
+        }
+
+        .info-button {
+            margin-top: 1rem;
+            padding: 10px 20px;
+            background-color: #6d4c41;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .info-button:hover {
+            background-color: #8d6e63;
+            box-shadow: 0 0 10px #6d4c41;
+        }
+
+        .info-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #d2b48c;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            z-index: 1001;
+            max-width: 80%;
+            max-height: 80%;
+            overflow-y: auto;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        footer {
+            background-color: #d4c3a3;
+            padding: 1rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">Cabelo Todo Dia</div>
+        <div class="menu-icon">☰</div>
+    </header>
+
+    <nav class="menu">
+        <a href="#" target="_blank">Facebook</a>
+        <a href="#" target="_blank">Instagram</a>
+        <a href="#" target="_blank">Twitter</a>
+        <a href="#" target="_blank">WhatsApp</a>
+    </nav>
+
+    <main>
+        <div class="pentagon-container">
+            <div class="pentagon">
+                <div class="face" style="transform: rotateY(0deg) translateZ(150px);">
+                    <img src="1.jpg" alt="Produto 1">
+                </div>
+                <div class="face" style="transform: rotateY(72deg) translateZ(150px);">
+                    <img src="2.jpg" alt="Produto 2">
+                </div>
+                <div class="face" style="transform: rotateY(144deg) translateZ(150px);">
+                    <img src="3.jpg" alt="Produto 3">
+                </div>
+                <div class="face" style="transform: rotateY(216deg) translateZ(150px);">
+                    <img src="4.jpg" alt="Produto 4">
+                </div>
+                <div class="face" style="transform: rotateY(288deg) translateZ(150px);">
+                    <img src="5.jpg" alt="Produto 5">
+                </div>
+            </div>
+            <button class="info-button">Informações do Produto</button>
+        </div>
+
+        <div class="pentagon-container">
+            <div class="pentagon">
+                <div class="face" style="transform: rotateY(0deg) translateZ(150px);">
+                    <img src="1.jpg" alt="Produto 6">
+                </div>
+                <div class="face" style="transform: rotateY(72deg) translateZ(150px);">
+                    <img src="2.jpg" alt="Produto 7">
+                </div>
+                <div class="face" style="transform: rotateY(144deg) translateZ(150px);">
+                    <img src="3.jpg" alt="Produto 8">
+                </div>
+                <div class="face" style="transform: rotateY(216deg) translateZ(150px);">
+                    <img src="4.jpg" alt="Produto 9">
+                </div>
+                <div class="face" style="transform: rotateY(288deg) translateZ(150px);">
+                    <img src="5.jpg" alt="Produto 10">
+                </div>
+            </div>
+            <button class="info-button">Informações do Produto</button>
+        </div>
+
+        <div class="pentagon-container">
+            <div class="pentagon">
+                <div class="face" style="transform: rotateY(0deg) translateZ(150px);">
+                    <img src="1.jpg" alt="Produto 11">
+                </div>
+                <div class="face" style="transform: rotateY(72deg) translateZ(150px);">
+                    <img src="2.jpg" alt="Produto 12">
+                </div>
+                <div class="face" style="transform: rotateY(144deg) translateZ(150px);">
+                    <img src="3.jpg" alt="Produto 13">
+                </div>
+                <div class="face" style="transform: rotateY(216deg) translateZ(150px);">
+                    <img src="4.jpg" alt="Produto 14">
+                </div>
+                <div class="face" style="transform: rotateY(288deg) translateZ(150px);">
+                    <img src="5.jpg" alt="Produto 15">
+                </div>
+            </div>
+            <button class="info-button">Informações do Produto</button>
+        </div>
+    </main>
+
+    <img class="expanded-image" src="" alt="Imagem expandida">
+
+    <div class="info-modal">
+        <span class="close-modal">&times;</span>
+        <h2>Informações do Produto</h2>
+        <p>Descrição detalhada do produto selecionado.</p>
+    </div>
+
+    <footer>
+        <p>Contato: info@cabelotododia.com | Telefone: (XX) XXXX-XXXX</p>
+    </footer>
+
+    <script>
+        const menuIcon = document.querySelector('.menu-icon');
+        const menu = document.querySelector('.menu');
+        const pentagons = document.querySelectorAll('.pentagon');
+        const expandedImage = document.querySelector('.expanded-image');
+        const infoButtons = document.querySelectorAll('.info-button');
+        const infoModal = document.querySelector('.info-modal');
+        const closeModal = document.querySelector('.close-modal');
+
+        menuIcon.addEventListener('click', () => {
+            menu.classList.toggle('open');
+            menuIcon.textContent = menu.classList.contains('open') ? '✕' : '☰';
+        });
+
+        pentagons.forEach(pentagon => {
+            let rotation = 0;
+            let startX;
+            let isDragging = false;
+
+            function rotatePentagon() {
+                rotation += 0.25;
+                pentagon.style.transform = `rotateY(${rotation}deg)`;
+                requestAnimationFrame(rotatePentagon);
+            }
+
+            rotatePentagon();
+
+            pentagon.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                startX = e.clientX;
+            });
+
+            pentagon.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    const deltaX = e.clientX - startX;
+                    rotation += deltaX * 0.25;
+                    startX = e.clientX;
+                }
+            });
+
+            pentagon.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+
+            pentagon.addEventListener('mouseleave', () => {
+                isDragging = false;
+            });
+
+            pentagon.addEventListener('touchstart', (e) => {
+                isDragging = true;
+                startX = e.touches[0].clientX;
+            });
+
+            pentagon.addEventListener('touchmove', (e) => {
+                if (isDragging) {
+                    const deltaX = e.touches[0].clientX - startX;
+                    rotation += deltaX * 0.25;
+                    startX = e.touches[0].clientX;
+                }
+            });
+
+            pentagon.addEventListener('touchend', () => {
+                isDragging = false;
+            });
+
+            const faces = pentagon.querySelectorAll('.face');
+            faces.forEach(face => {
+                face.addEventListener('click', () => {
+                    const img = face.querySelector('img');
+                    expandedImage.src = img.src;
+                    expandedImage.style.display = 'block';
+                });
+            });
+        });
+
+        expandedImage.addEventListener('click', () => {
+            expandedImage.style.display = 'none';
+        });
+
+        infoButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                infoModal.style.display = 'block';
+            });
+        });
+
+        closeModal.addEventListener('click', () => {
+            infoModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', (e) => {
+            if (e.target === infoModal) {
+                infoModal.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
