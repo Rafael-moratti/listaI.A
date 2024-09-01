@@ -54,7 +54,8 @@
             margin: 50px auto;
             position: relative;
             transform-style: preserve-3d;
-            animation: rotate 15s infinite linear;
+            animation: rotate 30s infinite linear;
+            animation-play-state: running;
         }
         .face {
             position: absolute;
@@ -68,6 +69,11 @@
             font-size: 24px;
             color: #8b4513;
             backface-visibility: hidden;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+        .face:not(.selected) {
+            opacity: 0.7;
         }
         @keyframes rotate {
             from { transform: rotateY(0deg); }
@@ -101,17 +107,17 @@
         <a href="#">WhatsApp</a>
     </nav>
 
-    <div class="pentagon">
-        <div class="face" style="transform: rotateY(0deg) translateZ(150px);">Produto 1</div>
-        <div class="face" style="transform: rotateY(72deg) translateZ(150px);">Produto 2</div>
-        <div class="face" style="transform: rotateY(144deg) translateZ(150px);">Produto 3</div>
-        <div class="face" style="transform: rotateY(216deg) translateZ(150px);">Produto 4</div>
-        <div class="face" style="transform: rotateY(288deg) translateZ(150px);">Produto 5</div>
+    <div class="pentagon" id="pentagon">
+        <div class="face" style="transform: rotateY(0deg) translateZ(150px);" onclick="selectProduct(this, 'Produto 1')">Produto 1</div>
+        <div class="face" style="transform: rotateY(72deg) translateZ(150px);" onclick="selectProduct(this, 'Produto 2')">Produto 2</div>
+        <div class="face" style="transform: rotateY(144deg) translateZ(150px);" onclick="selectProduct(this, 'Produto 3')">Produto 3</div>
+        <div class="face" style="transform: rotateY(216deg) translateZ(150px);" onclick="selectProduct(this, 'Produto 4')">Produto 4</div>
+        <div class="face" style="transform: rotateY(288deg) translateZ(150px);" onclick="selectProduct(this, 'Produto 5')">Produto 5</div>
     </div>
 
-    <div class="product-info">
+    <div class="product-info" id="productInfo">
         <h2>Informações do Produto</h2>
-        <p>Detalhes sobre o produto selecionado aparecerão aqui.</p>
+        <p>Clique em um produto para ver mais detalhes.</p>
     </div>
 
     <footer>
@@ -121,6 +127,48 @@
     <script>
         function toggleMenu() {
             document.getElementById('menu').classList.toggle('open');
+        }
+
+        function selectProduct(element, productName) {
+            const pentagon = document.getElementById('pentagon');
+            const faces = document.getElementsByClassName('face');
+            
+            // Remove a classe 'selected' de todas as faces
+            for (let face of faces) {
+                face.classList.remove('selected');
+            }
+            
+            // Adiciona a classe 'selected' à face clicada
+            element.classList.add('selected');
+            
+            // Para a animação
+            pentagon.style.animationPlayState = 'paused';
+            
+            // Atualiza as informações do produto
+            document.getElementById('productInfo').innerHTML = `
+                <h2>${productName}</h2>
+                <p>Aqui estão mais detalhes sobre ${productName}. Você pode adicionar descrições, preços e outras informações relevantes.</p>
+                <button onclick="resumeRotation()">Voltar à rotação</button>
+            `;
+        }
+
+        function resumeRotation() {
+            const pentagon = document.getElementById('pentagon');
+            const faces = document.getElementsByClassName('face');
+            
+            // Remove a classe 'selected' de todas as faces
+            for (let face of faces) {
+                face.classList.remove('selected');
+            }
+            
+            // Reinicia a animação
+            pentagon.style.animationPlayState = 'running';
+            
+            // Reseta as informações do produto
+            document.getElementById('productInfo').innerHTML = `
+                <h2>Informações do Produto</h2>
+                <p>Clique em um produto para ver mais detalhes.</p>
+            `;
         }
     </script>
 </body>
