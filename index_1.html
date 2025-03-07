@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aventura Interativa - Livro Jogo</title>
+    <style>
+        /* Estilos gerais */
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Times New Roman', serif;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            background-color: #000;
+            color: #fff;
+        }
+
+        /* Tela inicial */
+        #tela-inicial {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"><rect width="400" height="400" fill="black"/><circle cx="200" cy="200" r="150" fill="darkblue"/><circle cx="200" cy="200" r="120" fill="purple"/><circle cx="200" cy="200" r="90" fill="darkred"/></svg>');
+            background-size: cover;
+            z-index: 100;
+        }
+
+        #background-animation {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0.6;
+            background: radial-gradient(circle, rgba(76,0,153,1) 0%, rgba(0,0,0,1) 100%);
+        }
+
+        .stars {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 0 10px white;
+            animation: star-twinkle 3s infinite;
+        }
+
+        @keyframes star-twinkle {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        #titulo-jogo {
+            font-size: 4em;
+            color: #fff;
+            text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff;
+            margin-bottom: 50px;
+            z-index: 101;
+        }
+
+        #botao-iniciar {
+            padding: 15px 30px;
+            font-size: 1.5em;
+            background: linear-gradient(45deg, #800080, #4b0082);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 0 15px #ff00ff;
+            transition: all 0.3s;
+            z-index: 101;
+        }
+
+        #botao-iniciar:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 25px #ff00ff;
+        }
+
+        /* Tela de introdução */
+        #tela-introducao {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            background: black;
+            overflow: hidden;
+        }
+
+        #texto-introducao {
+            width: 80%;
+            font-size: 1.5em;
+            line-height: 1.6;
+            text-align: center;
+            transform: translateY(100%);
+            animation: scroll-up 30s linear forwards;
+            color: #ffcc00;
+            text-shadow: 0 0 5px #ffcc00;
+        }
+
+        @keyframes scroll-up {
+            from { transform: translateY(100%); }
+            to { transform: translateY(-100%); }
+        }
+
+        /* Páginas do jogo */
+        #pagina-jogo {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"><rect width="400" height="400" fill="saddlebrown"/><rect x="20" y="20" width="360" height="360" fill="burlywood"/></svg>');
+            background-size: cover;
+            background-repeat: repeat;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        #conteudo-pagina {
+            background-color: rgba(255, 235, 205, 0.9);
+            border-radius: 10px;
+            padding: 30px;
+            width: 80%;
+            max-width: 800px;
+            color: #654321;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+            font-size: 1.2em;
+            line-height: 1.6;
+            text-align: justify;
+            overflow-y: auto;
+            max-height: 70vh;
+        }
+
+        #texto-pagina {
+            margin-bottom: 30px;
+        }
+
+        #opcoes {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .opcao {
+            padding: 12px;
+            background-color: #8B4513;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .opcao:hover {
+            background-color: #A0522D;
+            transform: translateX(10px);
+        }
+
+        /* Tela de combate */
+        #tela-combate {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            background: linear-gradient(to bottom, #330000, #000000);
+            color: white;
+        }
+
+        #area-combate {
+            display: flex;
+            justify-content: space-between;
+            height: 60%;
+            padding: 20px;
+        }
+
+        .personagem, .inimigo {
+            width: 45%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .avatar {
+            width: 200px;
+            height: 200px;
+            background-color: #555;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .personagem .avatar {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect width="200" height="200" fill="none"/><circle cx="100" cy="70" r="40" fill="tan"/><rect x="60" y="110" width="80" height="90" fill="blue"/><rect x="60" y="110" width="80" height="20" fill="brown"/><rect x="40" y="110" width="20" height="60" fill="blue"/><rect x="140" y="110" width="20" height="60" fill="blue"/></svg>');
+        }
+
+        .inimigo .avatar {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect width="200" height="200" fill="none"/><circle cx="100" cy="70" r="40" fill="darkred"/><rect x="60" y="110" width="80" height="90" fill="black"/><path d="M60,70 L80,40 L120,40 L140,70 Z" fill="darkred"/><circle cx="80" cy="60" r="10" fill="yellow"/><circle cx="120" cy="60" r="10" fill="yellow"/></svg>');
+        }
+
+        .barra-vida {
+            width: 100%;
+            height: 20px;
+            background-color: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .vida {
+            height: 100%;
+            background-color: #ff3333;
+            width: 100%;
+            transition: width 0.5s;
+        }
+
+        .status {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        #acoes-combate {
+            height: 40%;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+
+        #log-combate {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+
+        #botoes-combate {
+            display: flex;
+            gap: 10px;
+        }
+
+        .botao-combate {
+            flex: 1;
+            padding: 15px;
+            font-size: 1.2em;
+            background-color: #8b0000;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .botao-combate:hover {
+            background-color: #b22222;
+        }
+
+        /* Tela de game over */
+        #tela-game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.9);
+            color: white;
+        }
+
+        #mensagem-game-over {
+            font-size: 4em;
+            color: red;
+            text-shadow: 0 0 10px red;
+            margin-bottom: 40px;
+        }
+
+        #botao-reiniciar {
+            padding: 15px 30px;
+            font-size: 1.5em;
+            background-color: #8b0000;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* Tela de vitória */
+        #tela-vitoria {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle, rgba(76,175,80,1) 0%, rgba(0,100,0,1) 100%);
+            color: white;
+        }
+
+        #mensagem-vitoria {
+            font-size: 4em;
+            color: gold;
+            text-shadow: 0 0 10px gold;
+            margin-bottom: 40px;
+        }
+
+        #botao-jogar-novamente {
+            padding: 15px 30px;
+            font-size: 1.5em;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- Tela Inicial -->
+    <div id="tela-inicial">
+        <div id="background-animation"></div>
+        <h1 id="titulo-jogo">A Jornada do Herói</h1>
+        <button id="botao-iniciar">Iniciar Aventura</button>
+    </div>
+
+    <!-- Tela de Introdução -->
+    <div id="tela-introducao">
+        <div id="texto-introducao">
+            <h2>A Jornada do Herói</h2>
+            <p>Em um mundo distante, onde a magia e a tecnologia coexistem, uma antiga profecia começa a se manifestar...</p>
+            <p>Você é o último descendente de uma linhagem de guardiões, destinado a enfrentar o mal que desperta após mil anos de sono.</p>
+            <p>As terras do reino de Eldoria estão em perigo. O Lorde das Sombras retornou e com ele, criaturas das trevas invadem vilas e cidades.</p>
+            <p>Armado apenas com a espada de seus ancestrais e conhecimentos antigos, você parte em uma jornada para encontrar os artefatos que podem selar o mal novamente.</p>
+            <p>Seus passos o levarão por florestas encantadas, montanhas perigosas e ruínas esquecidas.</p>
+            <p>Escolha seu caminho com sabedoria, pois cada decisão pode mudar o destino do mundo...</p>
+            <p>A aventura começa agora...</p>
+        </div>
+    </div>
+
+    <!-- Páginas do Jogo -->
+    <div id="pagina-jogo">
+        <div id="conteudo-pagina">
+            <div id="texto-pagina"></div>
+            <div id="opcoes"></div>
+        </div>
+    </div>
+
+    <!-- Tela de Combate -->
+    <div id="tela-combate">
+        <div id="area-combate">
+            <div class="personagem">
+                <div class="avatar"></div>
+                <div class="status">Herói</div>
+                <div class="barra-vida">
+                    <div class="vida" id="vida-personagem"></div>
+                </div>
+                <div class="status" id="status-personagem">HP: 100/100</div>
+            </div>
+            <div class="inimigo">
+                <div class="avatar"></div>
+                <div class="status" id="nome-inimigo">Inimigo</div>
+                <div class="barra-vida">
+                    <div class="vida" id="vida-inimigo"></div>
+                </div>
+                <div class="status" id="status-inimigo">HP: 100/100</div>
+            </div>
+        </div>
+        <div id="acoes-combate">
+            <div id="log-combate"></div>
+            <div id="botoes-combate">
+                <button class="botao-combate" id="botao-atacar">Atacar</button>
+                <button class="botao-combate" id="botao-habilidade">Habilidade Especial</button>
+                <button class="botao-combate" id="botao-potion">Usar Poção</button>
+                <button class="botao-combate" id="botao-fugir">Tentar Fugir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tela de Game Over -->
+    <div id="tela-game-over">
+        <div id="mensagem-game-over">Game Over</div>
+        <button id="botao-reiniciar">Tentar Novamente</button>
+    </div>
+
+    <!-- Tela de Vitória -->
+    <div id="tela-vitoria">
+        <div id="mensagem-vitoria">Vitória!</div>
+        <button id="botao-jogar-novamente">Jogar Novamente</button>
+    </div>
+
+    <script>
+        // Definindo a estrutura do jogo
+        const paginas = {
+            1: {
+                texto: "Você se encontra na entrada da Floresta Sombria. O ar está carregado com magia antiga e o silêncio é perturbador. Seu primeiro destino é o Templo das Estrelas, onde dizem que o primeiro artefato está guardado. À sua frente, a trilha se divide em dois caminhos.",
+                opcoes: [
+                    { texto: "Seguir pelo caminho da esquerda, que parece mais escuro e denso", proxima: 2 },
+                    { texto: "Tomar o caminho da direita, que tem alguns sinais de uso recente", proxima: 3 }
+                ]
+            },
+            2: {
+                texto: "O caminho escuro o leva mais profundamente na floresta. As árvores parecem se fechar ao seu redor e você sente que está sendo observado. De repente, você ouve um ruído estranho vindo dos arbustos próximos.",
+                opcoes: [
+                    { texto: "Preparar sua espada e investigar o ruído", proxima: 4 },
+                    { texto: "Ignorar e continuar pelo caminho, acelerando o passo", proxima: 5 }
+                ]
+            },
+            3: {
+                texto: "Seguindo pelo caminho da direita, você encontra pegadas recentes. Após algumas horas de caminhada, você chega a uma pequena clareira onde um acampamento abandonado está montado. Parece que alguém deixou o local às pressas.",
+                opcoes: [
+                    { texto: "Examinar o acampamento em busca de pistas ou itens úteis", proxima: 6 },
+                    { texto: "Evitar o acampamento e continuar pela trilha", proxima: 7 }
+                ]
+            },
+            4: {
+                texto: "Empunhando sua espada, você afasta os arbustos e se depara com um pequeno ser brilhante - um espírito da floresta. A criatura parece assustada, mas ao perceber que você não tem intenção de atacá-la, se acalma.",
+                opcoes: [
+                    { texto: "Tentar se comunicar com o espírito", proxima: 8 },
+                    { texto: "Agradecer o encontro e seguir seu caminho", proxima: 9 }
+                ]
+            },
+            5: {
+                texto: "Você decide ignorar o ruído e acelera o passo. Infelizmente, isso era exatamente o que a criatura que o espreitava esperava. Um grande lobo sombrio, com olhos brilhantes como brasas, salta na sua frente, bloqueando o caminho. Ele não parece natural - há uma aura maligna ao seu redor.",
+                opcoes: [
+                    { texto: "Enfrentar o lobo sombrio", combate: "lobo" },
+                    { texto: "Tentar assustar o lobo com magia básica de luz", proxima: 10 }
+                ]
+            },
+            6: {
+                texto: "No acampamento, você encontra um diário parcialmente queimado. As páginas legíveis mencionam uma expedição em busca do mesmo artefato que você procura. Há também um mapa que mostra um caminho alternativo para o templo e uma pequena poção de cura.",
+                opcoes: [
+                    { texto: "Seguir o caminho indicado no mapa", proxima: 11 },
+                    { texto: "Ignorar o mapa e continuar pelo caminho original", proxima: 7 }
+                ],
+                acao: function() {
+                    // Adicionar poção ao inventário
+                    jogador.pocoes += 1;
+                    atualizarUI();
+                }
+            },
+            7: {
+                texto: "Continuando pela trilha, você se depara com um riacho de águas cristalinas. A água parece pura e revigorante. À distância, você percebe uma ponte antiga que cruza para o outro lado.",
+                opcoes: [
+                    { texto: "Beber a água do riacho e descansar um pouco", proxima: 12 },
+                    { texto: "Seguir diretamente para a ponte", proxima: 13 }
+                ]
+            },
+            8: {
+                texto: "O espírito da floresta parece entender sua linguagem. Através de gestos e fragmentos de palavras antigas, ele tenta lhe transmitir uma mensagem importante. Você compreende que há um perigo à frente, mas também uma passagem secreta que pode levá-lo ao templo mais rapidamente.",
+                opcoes: [
+                    { texto: "Pedir ao espírito que mostre a passagem secreta", proxima: 14 },
+                    { texto: "Agradecer e seguir o caminho normal, agora mais atento ao perigo", proxima: 15 }
+                ]
+            },
+            9: {
+                texto: "Você agradece ao espírito com um aceno e continua seu caminho. O espírito, entretanto, decide segui-lo à distância. Após algum tempo, você chega a uma bifurcação não marcada em seus mapas.",
+                opcoes: [
+                    { texto: "Seguir o caminho que desce em direção a um vale", proxima: 16 },
+                    { texto: "Tomar o caminho que sobe em direção às colinas", proxima: 17 }
+                ]
+            },
+            10: {
+                texto: "Você rapidamente conjura uma magia de luz, criando um flash brilhante. O lobo sombrio uiva de dor quando a luz atinge seus olhos sensíveis. Ele recua, dando-lhe uma oportunidade.",
+                opcoes: [
+                    { texto: "Aproveitar a oportunidade para fugir rapidamente", proxima: 18 },
+                    { texto: "Atacar o lobo enquanto ele está desorientado", combate: "lobo_fraco" }
+                ]
+            },
+            11: {
+                texto: "Seguindo o mapa encontrado, você descobre uma trilha quase invisível que serpenteia entre rochas enormes. Após uma hora de caminhada, a trilha o leva a uma caverna cuja entrada está parcialmente escondida por vinhas.",
+                opcoes: [
+                    { texto: "Entrar na caverna", proxima: 19 },
+                    { texto: "Considerar muito arriscado e voltar ao caminho principal", proxima: 7 }
+                ]
+            },
+            12: {
+                texto: "Você se aproxima do riacho e bebe da água cristalina. Uma sensação revigorante percorre seu corpo. Você recupera parte de sua energia e vitalidade. Descansando à beira do riacho, você nota entalhes antigos nas pedras próximas.",
+                opcoes: [
+                    { texto: "Examinar os entalhes nas pedras", proxima: 20 },
+                    { texto: "Continuar em direção à ponte após o descanso", proxima: 13 }
+                ],
+                acao: function() {
+                    // Recuperar vida pelo descanso
+                    jogador.hp = Math.min(jogador.maxHp, jogador.hp + 30);
+                    atualizarUI();
+                }
+            },
+            13: {
+                texto: "A ponte é uma estrutura antiga, feita de madeira e cordas. Parece frágil, mas é o único caminho para atravessar o riacho, que se alarga neste ponto. Quando você está no meio da ponte, percebe uma figura encapuzada do outro lado, bloqueando seu caminho.",
+                opcoes: [
+                    { texto: "Continuar avançando e confrontar a figura misteriosa", proxima: 21 },
+                    { texto: "Recuar e procurar outro caminho para atravessar", proxima: 22 }
+                ]
+            },
+            14: {
+                texto: "O espírito flutua pelo ar, indicando que você deve segui-lo. Ele o leva através de um caminho invisível entre as árvores, revelando uma entrada oculta em um grande carvalho oco. Dentro, há um túnel que desce profundamente na terra.",
+                opcoes: [
+                    { texto: "Seguir pelo túnel subterrâneo", proxima: 23 },
+                    { texto: "Agradecer ao espírito, mas optar por um caminho menos misterioso", proxima: 15 }
+                ]
+            },
+            15: {
+                texto: "Decidindo seguir pelo caminho normal, você permanece alerta para o perigo mencionado pelo espírito. Sua cautela é recompensada quando você percebe uma linha quase invisível atravessando o caminho - uma armadilha.",
+                opcoes: [
+                    { texto: "Tentar desarmar a armadilha", proxima: 24 },
+                    { texto: "Desviar cuidadosamente da armadilha", proxima: 25 }
+                ]
+            },
+            16: {
+                texto: "O caminho que desce o leva a um vale nebuloso. A névoa é espessa e misteriosa, mas não parece natural. Há algo mágico nela. À medida que avança, você começa a ouvir sussurros etéreos ao seu redor.",
+                opcoes: [
+                    { texto: "Usar magia para dissipar a névoa", proxima: 26 },
+                    { texto: "Seguir os sussurros, que parecem estar guiando você", proxima: 27 }
+                ]
+            },
+            17: {
+                texto: "Subindo em direção às colinas, o ar fica mais limpo e a visibilidade melhora. De um ponto mais alto, você avista o Templo das Estrelas ao longe, brilhando sob o sol da tarde. No entanto, também percebe um acampamento de criaturas sombrias entre você e o templo.",
+                opcoes: [
+                    { texto: "Tentar contornar o acampamento inimigo", proxima: 28 },
+                    { texto: "Observar o acampamento e planejar um ataque", proxima: 29 }
+                ]
+            },
+            18: {
+                texto: "Aproveitando a confusão do lobo, você corre pela floresta, desviando de árvores e saltando sobre raízes. Após alguns minutos de fuga intensa, você para para recuperar o fôlego, acreditando ter despistado o predador.",
+                opcoes: [
+                    { texto: "Continuar se movendo, mantendo um ritmo mais cauteloso", proxima: 30 },
+                    { texto: "Escalar uma árvore para ter uma visão melhor da área", proxima: 31 }
+                ]
+            },
+            19: {
+                texto: "A caverna é surpreendentemente iluminada por cristais bioluminescentes. O túnel desce em espiral, levando cada vez mais fundo. Após uma curva, você se depara com uma sala ampla onde um pequeno altar está posicionado no centro.",
+                opcoes: [
+                    { texto: "Aproximar-se do altar para examiná-lo", proxima: 32 },
+                    { texto: "Verificar a sala em busca de armadilhas ou passagens secretas", proxima: 33 }
+                ]
+            },
+            20: {
+                texto: "Os entalhes revelam um mapa antigo da região, mostrando o Templo das Estrelas e vários caminhos até ele. Um dos caminhos está marcado com símbolos que você reconhece como avisos de perigo. Outro caminho, embora mais longo, parece mais seguro.",
+                opcoes: [
+                    { texto: "Optar pelo caminho mais curto, apesar dos avisos de perigo", proxima: 34 },
+                    { texto: "Escolher o caminho mais longo e seguro", proxima: 35 }
+                ]
+            },
+            21: {
+                texto: "Ao se aproximar, você percebe que a figura encapuzada é um guardião antigo do templo. Sua forma é translúcida, revelando sua natureza espectral. 'Apenas os dignos podem passar', ele anuncia com uma voz que parece vir de outro mundo.",
+                opcoes: [
+                    { texto: "Explicar sua missão e pedir passagem", proxima: 36 },
+                    { texto: "Tentar passar à força", proxima: 37 }
+                ]
+            },
+            22: {
+                texto: "Decidindo não enfrentar a figura misteriosa, você recua e procura outro caminho. Seguindo o riacho, encontra um ponto onde a água é mais rasa e consegue atravessar pulando sobre pedras. Do outro lado, você encontra uma trilha menos usada que parece contornar o caminho principal.",
+                opcoes: [
+                    { texto: "Seguir a trilha alternativa", proxima: 38 },
+                    { texto: "Voltar à ponte, pois o outro caminho parece muito suspeito", proxima: 21 }
+                ]
+            },
+            23: {
+                texto: "O túnel subterrâneo é antigo e sustentado por raízes de árvores entrelaçadas. Após um longo percurso na escuridão, iluminado apenas por ocasionais fungos luminosos, você emerge em uma câmara natural sob o Templo das Estrelas.",
+                opcoes: [
+                    { texto: "Procurar uma maneira de subir para o templo", proxima: 39 },
+                    { texto: "Explorar mais a câmara subterrânea", proxima: 40 }
+                ]
+            },
+            24: {
+                texto: "Com cuidado, você examina a armadilha e percebe que é um sistema de dardos venenosos. Usando seus conhecimentos, tenta desarmar o mecanismo. Um clique satisfatório indica seu sucesso, mas também alerta algo nas proximidades.",
+                opcoes: [
+                    { texto: "Preparar-se para um possível ataque", proxima: 41 },
+                    { texto: "Tentar se esconder rapidamente", proxima: 42 }
+                ]
+            },
+            25: {
+                texto: "Você cuidadosamente contorna a armadilha, tomando um caminho mais longo através do mato denso. Este desvio o leva a uma pequena clareira onde uma estátua antiga de um guerreiro está posicionada, segurando um escudo real.",
+                opcoes: [
+                    { texto: "Examinar a estátua mais de perto", proxima: 43 },
+                    { texto: "Ignorar a estátua e retornar ao caminho principal", proxima: 44 }
+                ]
+            },
+            26: {
+                texto: "Concentrando sua energia, você conjura um vento mágico que começa a dissipar a névoa. À medida que a visibilidade melhora, você percebe que estava à beira de um precipício! Os sussurros eram um aviso dos espíritos locais.",
+                opcoes: [
+                    { texto: "Agradecer aos espíritos e procurar um caminho seguro", proxima: 45 },
+                    { texto: "Usar magia para criar uma ponte sobre o precipício", proxima: 46 }
+                ]
+            },
+            27: {
+                texto: "Seguindo os sussurros, você é guiado através da névoa com segurança. Eventualmente, chega a uma clareira onde uma anciã está sentada junto a uma fogueira azul. 'Eu estava esperando por você', ela diz.",
+                opcoes: [
+                    { texto: "Perguntar quem ela é e como sabia da sua vinda", proxima: 47 },
+                    { texto: "Perguntar diretamente sobre o artefato que você busca", proxima: 48 }
+                ]
+            },
+            28: {
+                texto: "Você decide contornar o acampamento inimigo, movendo-se silenciosamente entre rochas e arbustos. Quando está quase passando despercebido, pisa acidentalmente em um galho seco, produzindo um estalo alto.",
+                opcoes: [
+                    { texto: "Congelar no lugar e esperar para ver se foi notado", proxima: 49 },
+                    { texto: "Correr imediatamente em direção ao templo", proxima: 50 }
+                ]
+            },
+            29: {
+                texto: "De seu ponto de observação, você estuda o acampamento inimigo. Há cerca de dez criaturas sombrias, todas armadas. Elas parecem estar guardando algo - uma caixa ornamentada que poderia conter o artefato que você procura.",
+                opcoes: [
+                    { texto: "Planejar um ataque noturno, quando a maioria estiver dormindo", proxima: 51 },
+                    { texto: "Tentar criar uma distração para afastá-los do acampamento", proxima: 52 }
+                ]
+            },
+            30: {
+                texto: "Mantendo um ritmo cauteloso, você continua sua jornada pela floresta. O caminho gradualmente se torna mais claro e, após algumas horas, você avista uma torre de pedra antiga que parece ser parte do complexo do templo.",
+                opcoes: [
+                    { texto: "Dirigir-se diretamente para a torre", proxima: 53 },
+                    { texto: "Circundar a torre e procurar a entrada principal do templo", proxima: 54 }
+                ]
+            },
+            31: {
+                texto: "Do alto da árvore, você tem uma visão panorâmica da floresta. Consegue avistar o Templo das Estrelas a nordeste e também nota uma coluna de fumaça vindo de um acampamento a noroeste. O sol está começando a se pôr.",
+                opcoes: [
+                    { texto: "Descer e seguir em direção ao templo antes que escureça", proxima: 55 },
+                    { texto: "Investigar o acampamento, que poderia ser de aliados ou conter informações úteis", proxima: 56 }
+                ]
+            },
+            32: {
+                texto: "Ao se aproximar do altar, você percebe que há um artefato pequeno sobre ele - um amuleto em forma de estrela que brilha com luz própria. Quando você estende a mão para pegá-lo, o chão começa a tremer.",
+                opcoes: [
+                    { texto: "Rapidamente pegar o amuleto e correr para a saída", proxima: 57 },
+                    { texto: "Recuar e observar o que acontece", proxima: 58 }
+                ]
+            },
+            33: {
+                texto: "Inspecionando a sala com cuidado, você descobre um mecanismo oculto nas paredes. Acioná-lo revela uma passagem secreta atrás do altar. Através da abertura, você vê uma câmara menor onde o verdadeiro artefato repousa - o Amuleto Estelar.",
+                opcoes: [
+                    { texto: "Entrar na câmara secreta e pegar o amuleto", proxima: 59 },
+                    { texto: "Verificar se há armadilhas antes de entrar", proxima: 60 }
+                ]
+            },
+            34: {
+                texto: "Optando pelo caminho mais curto, você logo descobre por que havia avisos. O caminho leva a um território infestado de criaturas sombrias. Enquanto tenta passar sorrateiramente, é descoberto por uma patrulha.",
+                opcoes: [
+                    { texto: "Enfrentar as criaturas sombrias", combate: "patrulha" },
+                    { texto: "Tentar fugir e encontrar outro caminho", proxima: 61 }
+                ]
+            },
+            35: {
+                texto: "O caminho mais longo é tranquilo e seguro, levando-o através de vales e colinas. Após várias horas de viagem, você chega a um lago cristalino. Do outro lado do lago, você pode ver a entrada do Templo das Estrelas.",
+                opcoes: [
+                    { texto: "Procurar um barco ou maneira de atravessar", proxima: 62 },
+                    { texto: "Contornar o lago a pé", proxima: 63 }
+                ]
+            },
+            36: {
+                texto: "Você explica ao guardião espectral sobre a ameaça do Lorde das Sombras e sua missão para encontrar os artefatos. O guardião ouve atentamente e parece avaliar a verdade em suas palavras. 'Sua causa é justa', ele finalmente diz, 'mas você deve provar seu valor.'",
+                opcoes: [
+                    { texto: "Aceitar o desafio do guardião", proxima: 64 },
+                    { texto: "Perguntar se há outra maneira de provar seu valor", proxima: 65 }
+                ]
+            },
+            37: {
+                texto: "Decidindo que não tem tempo para negociar, você tenta passar à força pelo guardião espectral. Esta foi uma escolha imprudente. O guardião revela seu verdadeiro poder, convocando ventos mágicos que o empurram para trás. 'Você não é digno', declara.",
+                opcoes: [
+                    { texto: "Desculpar-se e pedir outra chance", proxima: 36 },
+                    { texto: "Tentar combater o guardião", combate: "guardiao" }
+                ]
+            },
+            38: {
+                texto: "A trilha alternativa é mais difícil de seguir, mas parece levar na direção certa. Após uma hora de caminhada em terreno acidentado, você chega a uma encosta que oferece uma vista do templo. Há uma entrada lateral menos guardada.",
+                opcoes: [
+                    { texto: "Aproximar-se da entrada lateral do templo", proxima: 66 },
+                    { texto: "Observar mais para garantir que não é uma armadilha", proxima: 67 }
+                ]
+            },
+            39: {
+                texto: "Examinando a câmara, você encontra uma escada antiga talhada na rocha que parece subir em direção ao templo. A escada é estreita e íngreme, mas parece ser o caminho certo.",
+                opcoes: [
+                    { texto: "Subir pela escada", proxima: 68 },
+                    { texto: "Procurar mais pistas ou itens na câmara antes de subir", proxima: 69 }
+                ]
+            },
+            40: {
+                texto: "Explorando mais a câmara, você descobre vários entalhes nas paredes que contam a história do templo e do artefato que busca. Também encontra um pequeno nicho onde repousa uma chave ornamentada.",
+                opcoes: [
+                    { texto: "Pegar a chave e subir em direção ao templo", proxima: 70 },
+                    { texto: "Continuar explorando a câmara em busca de mais segredos", proxima: 71 }
+                ],
+                acao: function() {
+                    // Adicionar chave ao inventário
+                    jogador.temChave = true;
+                    atualizarUI();
+                }
+            },
+            41: {
+                texto: "Você desembainha sua espada e se prepara para um possível ataque. Momentos depois, duas criaturas sombrias emergem dos arbustos, atraídas pelo ruído. Seus olhos vermelhos brilham com malícia.",
+                opcoes: [
+                    { texto: "Atacar primeiro, aproveitando o elemento surpresa", combate: "sombras" },
+                    { texto: "Tentar intimidá-las, mostrando sua arma e determinação", proxima: 72 }
+                ]
+            },
+            42: {
+                texto: "Rapidamente, você se esconde atrás de uma árvore larga. Duas criaturas sombrias aparecem, investigando o som. Elas farejam o ar e examinam a armadilha desarmada, mas eventualmente se afastam, não o tendo detectado.",
+                opcoes: [
+                    { texto: "Continuar o caminho, agora com mais cautela", proxima: 73 },
+                    { texto: "Seguir as criaturas para descobrir para onde vão", proxima: 74 }
+                ]
+            },
+            43: {
+                texto: "Ao examinar a estátua, você nota que o escudo tem inscrições antigas. É um escudo real, não apenas parte da estátua. Uma inscrição diz: 'Para aquele que enfrentar as sombras, este escudo oferece proteção.'",
+                opcoes: [
+                    { texto: "Pegar o escudo", proxima: 75 },
+                    { texto: "Deixar o escudo e continuar seu caminho", proxima: 44 }
+                ],
+                acao: function() {
+                    // Adicionar escudo ao inventário
+                    jogador.temEscudo = true;
+                    jogador.defesa += 10;
+                    atualizarUI();
+                }
+            },
+            44: {
+                texto: "Retornando ao caminho principal, você continua sua jornada. O dia avança e você percebe que está se aproximando do Templo das Estrelas. No horizonte, você vê a estrutura antiga brilhando sob o sol poente.",
+                opcoes: [
+                    { texto: "Apressar o passo para chegar antes do anoitecer", proxima: 76 },
+                    { texto: "Manter um ritmo cauteloso, mesmo que isso signifique chegar após o pôr do sol", proxima: 77 }
+                ]
+            },
+            45: {
+                texto: "Você agradece aos espíritos pelo aviso e procura um caminho seguro. Guiado por ocasionais sussurros, encontra uma trilha natural que contorna o precipício e o leva em direção ao templo.",
+                opcoes: [
+                    { texto: "Seguir a trilha indicada pelos espíritos", proxima: 78 },
+                    { texto: "Parar e tentar se comunicar mais com os espíritos", proxima: 79 }
+                ]
+            },
+            46: {
+                texto: "Concentrando sua energia mágica, você cria uma ponte etérea sobre o precipício. É uma tarefa exaustiva que drena parte de sua energia vital, mas a ponte se forma, brilhando suavemente na névoa.",
+                opcoes: [
+                    { texto: "Atravessar a ponte mágica", proxima: 80 },
+                    { texto: "Desistir da ideia e procurar um caminho natural", proxima: 45 }
+                ],
+                acao: function() {
+                    // Perder vida pelo esforço mágico
+                    jogador.hp = Math.max(1, jogador.hp - 20);
+                    atualizarUI();
+                }
+            },
+            47: {
+                texto: "'Sou a Guardiã da Névoa', responde a anciã, 'e as estrelas falaram da sua vinda. O artefato que você busca está em perigo. O Lorde das Sombras enviou seus servos para capturá-lo antes de você.'",
+                opcoes: [
+                    { texto: "Perguntar como chegar ao templo antes dos servos das sombras", proxima: 81 },
+                    { texto: "Perguntar se ela pode ajudá-lo de alguma forma", proxima: 82 }
+                ]
+            },
+            48: {
+                texto: "Ao mencionar o artefato, o rosto da anciã fica sério. 'O Amuleto Estelar está guardado no coração do templo, protegido por enigmas antigos. Mas há servos das sombras tentando obtê-lo neste momento.'",
+                opcoes: [
+                    { texto: "Pedir informações sobre como chegar rapidamente ao templo", proxima: 81 },
+                    { texto: "Perguntar sobre os enigmas que protegem o amuleto", proxima: 83 }
+                ]
+            },
+            49: {
+                texto: "Você permanece imóvel, quase sem respirar. Uma criatura sombria se aproxima do lugar onde você está escondido, farejando o ar. Por um momento tenso, ela olha diretamente na sua direção, mas então se vira e volta para o acampamento.",
+                opcoes: [
+                    { texto: "Continuar o contorno com ainda mais cuidado", proxima: 84 },
+                    { texto: "Esperar mais tempo para garantir que é seguro se mover", proxima: 85 }
+                ]
+            },
+            50: {
+                texto: "Decidindo que a furtividade já foi comprometida, você corre em direção ao templo. Gritos de alarme soam atrás de você enquanto as criaturas sombrias percebem sua presença e iniciam a perseguição.",
+                opcoes: [
+                    { texto: "Continuar correndo, tentando chegar ao templo", proxima: 86 },
+                    { texto: "Parar e enfrentar seus perseguidores", combate: "perseguidores" }
+                ]
+            },
+            51: {
+                texto: "Você espera até o anoitecer, observando o acampamento. Como previsto, a maioria das criaturas vai dormir, deixando apenas dois guardas alertas. Com a noite protegendo-o, você se aproxima silenciosamente.",
+                opcoes: [
+                    { texto: "Tentar eliminar os guardas silenciosamente", proxima: 87 },
+                    { texto: "Tentar pegar a caixa sem ser notado", proxima: 88 }
+                ]
+            },
+            52: {
+                texto: "Você recolhe algumas pedras e as atira em uma direção distante do acampamento. O barulho atrai a atenção de várias criaturas, que vão investigar. Com o acampamento menos vigiado, você vê sua chance.",
+                opcoes: [
+                    { texto: "Mover-se rapidamente para o acampamento e procurar o artefato", proxima: 89 },
+                    { texto: "Criar mais uma distração para atrair os guardas restantes", proxima: 90 }
+                ]
+            },
+            53: {
+                texto: "Você se dirige à torre antiga, que parece ser uma estrutura de vigia. Ao se aproximar, nota que a porta está entreaberta e há luzes fracas vindo de dentro. O silêncio é perturbador.",
+                opcoes: [
+                    { texto: "Entrar na torre cautelosamente", proxima: 91 },
+                    { texto: "Circundar a torre procurando outra entrada", proxima: 92 }
+                ]
+            },
+            54: {
+                texto: "Contornando a torre, você segue um caminho que parece levar à entrada principal do templo. Após uma curta caminhada, chega a um pátio amplo com escadarias que levam a um portal majestoso decorado com símbolos estelares.",
+                opcoes: [
+                    { texto: "Subir as escadarias em direção ao portal", proxima: 93 },
+                    { texto: "Procurar por entradas secundárias menos visíveis", proxima: 94 }
+                ]
+            },
+            55: {
+                texto: "Descendo da árvore, você segue em direção ao templo antes que a escuridão torne a jornada mais perigosa. O caminho é relativamente livre de obstáculos, mas à medida que se aproxima, percebe que há guardas nas entradas principais.",
+                opcoes: [
+                    { texto: "Tentar encontrar uma entrada sem guardas", proxima: 95 },
+                    { texto: "Esperar o anoitecer completo para tentar entrar sorrateiramente", proxima: 96 }
+                ]
+            },
+            56: {
+                texto: "Você decide investigar o acampamento antes de seguir para o templo. Aproximando-se cautelosamente, descobre que é um grupo de caçadores locais, não aliados nem inimigos. Eles parecem surpresos com sua aparição.",
+                opcoes: [
+                    { texto: "Apresentar-se e perguntar sobre o templo", proxima: 97 },
+                    { texto: "Desculpar-se pela intrusão e seguir seu caminho", proxima: 98 }
+                ]
+            },
+            57: {
+                texto: "Você rapidamente agarra o amuleto e corre para a saída enquanto a caverna começa a desmoronar. Pedras caem do teto e o chão treme violentamente. Com agilidade, consegue escapar por pouco, emergindo novamente na floresta.",
+                opcoes: [
+                    { texto: "Examinar o amuleto que conseguiu recuperar", proxima: 99 },
+                    { texto: "Continuar rapidamente sua jornada, temendo perseguidores", proxima: 100 }
+                ],
+                acao: function() {
+                    // Adicionar amuleto ao inventário
+                    jogador.temAmuleto = true;
+                    jogador.poderMagico += 15;
+                    atualizarUI();
+                }
+            },
+            58: {
+                texto: "Você recua e observa enquanto o tremor aumenta. Surpreendentemente, o altar começa a se mover, revelando uma escadaria secreta que desce ainda mais fundo. O tremor cessa assim que a passagem é totalmente revelada.",
+                opcoes: [
+                    { texto: "Descer pela escadaria secreta", proxima: 101 },
+                    { texto: "Pegar o amuleto do altar antes de explorar mais", proxima: 102 }
+                ]
+            },
+            59: {
+                texto: "Você entra na câmara secreta e pega o Amuleto Estelar. Ao fazer isso, um brilho suave emana do artefato, envolvendo-o. Você sente um poder antigo fluindo através de você, fortalecendo sua magia.",
+                opcoes: [
+                    { texto: "Sair da caverna com o amuleto", proxima: 103 },
+                    { texto: "Examinar a câmara em busca de mais artefatos ou informações", proxima: 104 }
+                ],
+                acao: function() {
+                    // Adicionar amuleto ao inventário e aumentar poder mágico
+                    jogador.temAmuleto = true;
+                    jogador.poderMagico += 15;
+                    atualizarUI();
+                }
+            },
+            60: {
+                texto: "Verificando cuidadosamente, você descobre uma armadilha sutil - um fio quase invisível conectado a dardos venenosos. Com cautela, consegue desarmar a armadilha e entrar na câmara secreta onde o Amuleto Estelar repousa em um pedestal.",
+                opcoes: [
+                    { texto: "Pegar o amuleto", proxima: 59 },
+                    { texto: "Verificar se há mais armadilhas ao redor do pedestal", proxima: 105 }
+                ]
+            },
+            // Continue com mais páginas conforme necessário...
+
+            // Final - Vitória
+            100: {
+                texto: "Com o Amuleto Estelar em sua posse, você sente que completou a primeira parte de sua missão. O artefato pulsa com energia antiga, reconhecendo você como seu portador legítimo. É hora de retornar e preparar-se para o próximo passo em sua jornada contra o Lorde das Sombras.",
+                opcoes: [
+                    { texto: "Concluir esta etapa da aventura", final: "vitoria" }
+                ]
+            },
+            
+            // Final - Derrota
+            37: {
+                texto: "Sua tentativa de enfrentar o guardião espectral prova ser fatal. Ele convoca poderes ancestrais que nenhum mortal poderia combater. Enquanto a escuridão o envolve, seu último pensamento é que falhou em sua missão. O Lorde das Sombras não encontrará resistência...",
+                opcoes: [
+                    { texto: "Aceitar seu destino", final: "derrota" }
+                ]
+            }
+        };
+
+        // Definições de combate
+        const inimigos = {
+            lobo: {
+                nome: "Lobo Sombrio",
+                hp: 60,
+                maxHp: 60,
+                ataque: 10,
+                defesa: 5,
+                proxima: 18
+            },
+            lobo_fraco: {
+                nome: "Lobo Sombrio Ferido",
+                hp: 30,
+                maxHp: 60,
+                ataque: 8,
+                defesa: 3,
+                proxima: 18
+            },
+            guardiao: {
+                nome: "Guardião Espectral",
+                hp: 100,
+                maxHp: 100,
+                ataque: 15,
+                defesa: 10,
+                proxima: 36
+            },
+            patrulha: {
+                nome: "Patrulha Sombria",
+                hp: 75,
+                maxHp: 75,
+                ataque: 12,
+                defesa: 7,
+                proxima: 35
+            },
+            sombras: {
+                nome: "Criaturas Sombrias",
+                hp: 65,
+                maxHp: 65,
+                ataque: 11,
+                defesa: 6,
+                proxima: 73
+            },
+            perseguidores: {
+                nome: "Perseguidores Sombrios",
+                hp: 85,
+                maxHp: 85,
+                ataque: 13,
+                defesa: 8,
+                proxima: 86
+            }
+        };
+
+        // Jogador
+        let jogador = {
+            hp: 100,
+            maxHp: 100,
+            ataque: 15,
+            defesa: 5,
+            poderMagico: 10,
+            pocoes: 2,
+            temEscudo: false,
+            temAmuleto: false,
+            temChave: false
+        };
+
+        // Estado atual do jogo
+        let estadoJogo = {
+            paginaAtual: 1,
+            emCombate: false,
+            inimigoAtual: null
+        };
+
+        // Elementos da UI
+        const telaInicial = document.getElementById('tela-inicial');
+        const telaIntroducao = document.getElementById('tela-introducao');
+        const paginaJogo = document.getElementById('pagina-jogo');
+        const telaCombate = document.getElementById('tela-combate');
+        const telaGameOver = document.getElementById('tela-game-over');
+        const telaVitoria = document.getElementById('tela-vitoria');
+        const textoPagina = document.getElementById('texto-pagina');
+        const opcoesPagina = document.getElementById('opcoes');
+        const botaoIniciar = document.getElementById('botao-iniciar');
+        const botaoReiniciar = document.getElementById('botao-reiniciar');
+        const botaoJogarNovamente = document.getElementById('botao-jogar-novamente');
+        const logCombate = document.getElementById('log-combate');
+        const botaoAtacar = document.getElementById('botao-atacar');
+        const botaoHabilidade = document.getElementById('botao-habilidade');
+        const botaoPotion = document.getElementById('botao-potion');
+        const botaoFugir = document.getElementById('botao-fugir');
+        const vidaPersonagem = document.getElementById('vida-personagem');
+        const vidaInimigo = document.getElementById('vida-inimigo');
+        const statusPersonagem = document.getElementById('status-personagem');
+        const statusInimigo = document.getElementById('status-inimigo');
+        const nomeInimigo = document.getElementById('nome-inimigo');
+
+        // Criar estrelas para animação da tela inicial
+        function criarEstrelas() {
+            const backgroundAnimation = document.getElementById('background-animation');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.classList.add('stars');
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.animationDelay = `${Math.random() * 3}s`;
+                backgroundAnimation.appendChild(star);
+            }
+        }
+
+        // Inicializar o jogo
+        function iniciarJogo() {
+            telaInicial.style.display = 'none';
+            telaIntroducao.style.display = 'flex';
+            
+            // Após a introdução, mostrar a primeira página
+            setTimeout(() => {
+                telaIntroducao.style.display = 'none';
+                paginaJogo.style.display = 'flex';
+                mostrarPagina(1);
+            }, 15000); // Tempo suficiente para ler a introdução
+        }
+
+        // Mostrar uma página específica
+        function mostrarPagina(numeroPagina) {
+            const pagina = paginas[numeroPagina];
+            if (!pagina) return;
+            
+            estadoJogo.paginaAtual = numeroPagina;
+            
+            textoPagina.textContent = pagina.texto;
+            opcoesPagina.innerHTML = '';
+            
+            pagina.opcoes.forEach(opcao => {
+                const botaoOpcao = document.createElement('button');
+                botaoOpcao.classList.add('opcao');
+                botaoOpcao.textContent = opcao.texto;
+                
+                if (opcao.proxima) {
+                    botaoOpcao.addEventListener('click', () => {
+                        if (pagina.acao) pagina.acao();
+                        mostrarPagina(opcao.proxima);
+                    });
+                } else if (opcao.combate) {
+                    botaoOpcao.addEventListener('click', () => {
+                        if (pagina.acao) pagina.acao();
+                        iniciarCombate(opcao.combate);
+                    });
+                } else if (opcao.final) {
+                    botaoOpcao.addEventListener('click', () => {
+                        if (pagina.acao) pagina.acao();
+                        finalizarJogo(opcao.final);
+                    });
+                }
+                
+                opcoesPagina.appendChild(botaoOpcao);
+            });
+        }
+
+        // Iniciar combate
+        function iniciarCombate(tipoInimigo) {
+            const inimigo = inimigos[tipoInimigo];
+            if (!inimigo) return;
+            
+            estadoJogo.emCombate = true;
+            estadoJogo.inimigoAtual = JSON.parse(JSON.stringify(inimigo)); // Clone para não afetar o original
+            
+            paginaJogo.style.display = 'none';
+            telaCombate.style.display = 'flex';
+            
+            // Resetar interface de combate
+            logCombate.innerHTML = `<p>Você encontrou um ${inimigo.nome}!</p>`;
+            nomeInimigo.textContent = inimigo.nome;
+            atualizarBarrasVida();
+        }
+
+        // Atualizar barras de vida no combate
+        function atualizarBarrasVida() {
+            const percentualVidaJogador = (jogador.hp / jogador.maxHp) * 100;
+            const percentualVidaInimigo = (estadoJogo.inimigoAtual.hp / estadoJogo.inimigoAtual.maxHp) * 100;
+            
+            vidaPersonagem.style.width = `${percentualVidaJogador}%`;
+            vidaInimigo.style.width = `${percentualVidaInimigo}%`;
+            
+            statusPersonagem.textContent = `HP: ${jogador.hp}/${jogador.maxHp}`;
+            statusInimigo.textContent = `HP: ${estadoJogo.inimigoAtual.hp}/${estadoJogo.inimigoAtual.maxHp}`;
+        }
+
+        // Ação de ataque no combate
+        function atacar() {
+            if (!estadoJogo.emCombate) return;
+            
+            // Jogador ataca
+            const danoJogador = Math.max(1, jogador.ataque - estadoJogo.inimigoAtual.defesa/2);
+            estadoJogo.inimigoAtual.hp = Math.max(0, estadoJogo.inimigoAtual.hp - danoJogador);
+            
+            logCombate.innerHTML += `<p>Você ataca e causa ${danoJogador} de dano!</p>`;
+            
+            // Verificar se o inimigo foi derrotado
+            if (estadoJogo.inimigoAtual.hp <= 0) {
+                logCombate.innerHTML += `<p>Você derrotou o ${estadoJogo.inimigoAtual.nome}!</p>`;
+                atualizarBarrasVida();
+                
+                setTimeout(() => {
+                    telaCombate.style.display = 'none';
+                    paginaJogo.style.display = 'flex';
+                    estadoJogo.emCombate = false;
+                    mostrarPagina(estadoJogo.inimigoAtual.proxima);
+                }, 2000);
+                
+                return;
+            }
+            
+            // Inimigo ataca
+            const danoInimigo = Math.max(1, estadoJogo.inimigoAtual.ataque - jogador.defesa/2);
+            jogador.hp = Math.max(0, jogador.hp - danoInimigo);
+            
+            logCombate.innerHTML += `<p>O ${estadoJogo.inimigoAtual.nome} ataca e causa ${danoInimigo} de dano!</p>`;
+            
+            // Verificar se o jogador foi derrotado
+            if (jogador.hp <= 0) {
+                logCombate.innerHTML += `<p>Você foi derrotado!</p>`;
+                atualizarBarrasVida();
+                
+                setTimeout(() => {
+                    telaCombate.style.display = 'none';
+                    finalizarJogo('derrota');
+                }, 2000);
+                
+                return;
+            }
+            
+            atualizarBarrasVida();
+        }
+
+        // Usar habilidade especial no combate
+        function usarHabilidade() {
+            if (!estadoJogo.emCombate) return;
+            
+            // Habilidade especial baseada no poder mágico
+            const danoMagico = jogador.poderMagico * 1.5;
+            estadoJogo.inimigoAtual.hp = Math.max(0, estadoJogo.inimigoAtual.hp - danoMagico);
+            
+            logCombate.innerHTML += `<p>Você usa sua habilidade especial e causa ${danoMagico} de dano mágico!</p>`;
+            
+            // Verificar se o inimigo foi derrotado
+            if (estadoJogo.inimigoAtual.hp <= 0) {
+                logCombate.innerHTML += `<p>Você derrotou o ${estadoJogo.inimigoAtual.nome}!</p>`;
+                atualizarBarrasVida();
+                
+                setTimeout(() => {
+                    telaCombate.style.display = 'none';
+                    paginaJogo.style.display = 'flex';
+                    estadoJogo.emCombate = false;
+                    mostrarPagina(estadoJogo.inimigoAtual.proxima);
+                }, 2000);
+                
+                return;
+            }
+            
+            // Inimigo ataca
+            const danoInimigo = Math.max(1, estadoJogo.inimigoAtual.ataque - jogador.defesa/2);
+            jogador.hp = Math.max(0, jogador.hp - danoInimigo);
+            
+            logCombate.innerHTML += `<p>O ${estadoJogo.inimigoAtual.nome} ataca e causa ${danoInimigo} de dano!</p>`;
+            
+            // Verificar se o jogador foi derrotado
+            if (jogador.hp <= 0) {
+                logCombate.innerHTML += `<p>Você foi derrotado!</p>`;
+                atualizarBarrasVida();
+                
+                setTimeout(() => {
+                    telaCombate.style.display = 'none';
+                    finalizarJogo('derrota');
+                }, 2000);
+                
+                return;
+            }
+            
+            atualizarBarrasVida();
+        }
+
+        // Usar poção no combate
+        function usarPocao() {
+            if (!estadoJogo.emCombate || jogador.pocoes <= 0) return;
+            
+            jogador.pocoes--;
+            const curaAmount = 30;
+            jogador.hp = Math.min(jogador.maxHp, jogador.hp + curaAmount);
+            
+            logCombate.innerHTML += `<p>Você usa uma poção e recupera ${curaAmount} pontos de vida! Poções restantes: ${jogador.pocoes}</p>`;
+            
+            // Inimigo ataca
+            const danoInimigo = Math.max(1, estadoJogo.inimigoAtual.ataque - jogador.defesa/2);
+            jogador.hp = Math.max(0, jogador.hp - danoInimigo);
+            
+            logCombate.innerHTML += `<p>O ${estadoJogo.inimigoAtual.nome} ataca e causa ${danoInimigo} de dano!</p>`;
+            
+            // Verificar se o jogador foi derrotado
+            if (jogador.hp <= 0) {
+                logCombate.innerHTML += `<p>Você foi derrotado!</p>`;
+                atualizarBarrasVida();
+                
+                setTimeout(() => {
+                    telaCombate.style.display = 'none';
+                    finalizarJogo('derrota');
+                }, 2000);
+                
+                return;
+            }
+            
+            atualizarBarrasVida();
+        }
+
+        // Tentar fugir do combate
+        function tentarFugir() {
+            if (!estadoJogo.emCombate) return;
+            
+            // 50% de chance de fugir
+            if (Math.random() > 0.5) {
+                logCombate.innerHTML += `<p>Você conseguiu fugir do combate!</p>`;
+                
+                setTimeout(() => {
+                    telaCombate.style.display = 'none';
+                    paginaJogo.style.display = 'flex';
+                    estadoJogo.emCombate = false;
+                    mostrarPagina(estadoJogo.inimigoAtual.proxima);
+                }, 2000);
+            } else {
+                logCombate.innerHTML += `<p>Você não conseguiu fugir!</p>`;
+                
+                // Inimigo ataca com vantagem (dano aumentado)
+                const danoInimigo = Math.max(1, estadoJogo.inimigoAtual.ataque * 1.5 - jogador.defesa/2);
+                jogador.hp = Math.max(0, jogador.hp - danoInimigo);
+                
+                logCombate.innerHTML += `<p>O ${estadoJogo.inimigoAtual.nome} ataca com vantagem e causa ${danoInimigo} de dano!</p>`;
+                
+                // Verificar se o jogador foi derrotado
+                if (jogador.hp <= 0) {
+                    logCombate.innerHTML += `<p>Você foi derrotado!</p>`;
+                    atualizarBarrasVida();
+                    
+                    setTimeout(() => {
+                        telaCombate.style.display = 'none';
+                        finalizarJogo('derrota');
+                    }, 2000);
+                    
+                    return;
+                }
+                
+                atualizarBarrasVida();
+            }
+        }
+
+        // Finalizar o jogo (vitória ou derrota)
+        function finalizarJogo(resultado) {
+            if (resultado === 'vitoria') {
+                telaVitoria.style.display = 'flex';
+            } else {
+                telaGameOver.style.display = 'flex';
+            }
+        }
+
+        // Reiniciar o jogo
+        function reiniciarJogo() {
+            // Resetar estado do jogador
+            jogador = {
+                hp: 100,
+                maxHp: 100,
+                ataque: 15,
+                defesa: 5,
+                poderMagico: 10,
+                pocoes: 2,
+                temEscudo: false,
+                temAmuleto: false,
+                temChave: false
+            };
+            
+            // Resetar estado do jogo
+            estadoJogo = {
+                paginaAtual: 1,
+                emCombate: false,
+                inimigoAtual: null
+            };
+            
+            // Esconder todas as telas
+            telaInicial.style.display = 'flex';
+            telaIntroducao.style.display = 'none';
+            paginaJogo.style.display = 'none';
+            telaCombate.style.display = 'none';
+            telaGameOver.style.display = 'none';
+            telaVitoria.style.display = 'none';
+        }
+
+        // Atualizar a UI com base no estado atual
+        function atualizarUI() {
+            // Atualizar informações do jogador
+            if (estadoJogo.emCombate) {
+                atualizarBarrasVida();
+            }
+        }
+
+        // Event listeners
+        botaoIniciar.addEventListener('click', iniciarJogo);
+        botaoReiniciar.addEventListener('click', reiniciarJogo);
+        botaoJogarNovamente.addEventListener('click', reiniciarJogo);
+        botaoAtacar.addEventListener('click', atacar);
+        botaoHabilidade.addEventListener('click', usarHabilidade);
+        botaoPotion.addEventListener('click', usarPocao);
+        botaoFugir.addEventListener('click', tentarFugir);
+
+        // Inicializar o jogo
+        criarEstrelas();
+    </script>
+</body>
+</html>
