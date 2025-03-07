@@ -203,7 +203,7 @@
                     <img src="imagem/5.jpg" alt="Produto 5">
                 </div>
             </div>
-            <button class="info-button">Informações do Produto</button>
+            <a href="https://rafael-moratti.github.io/historyone/" class="info-button" style="text-decoration: none; display: inline-block; padding: 8px 16px; background-color: #f0f0f0; border: 1px solid #ccc; border-radius: 4px; cursor: pointer;">Inicio da Primeira Historia</a>
         </div>
 
         <div class="pentagon-container">
@@ -224,7 +224,12 @@
                     <img src="imagem/10.jpg" alt="Produto 10">
                 </div>
             </div>
-            <button class="info-button">Informações do Produto</button>
+            <button class="info-button" id="info-button">Iniciar a Segunda Historia</button>
+            <script>
+                document.getElementById('info-button').addEventListener('click', function() {
+                    window.location.href = 'https://rafael-moratti.github.io/historyone/';
+                });
+            </script>
         </div>
 
         <div class="pentagon-container">
@@ -245,7 +250,7 @@
                     <img src="imagem/15.jpg" alt="Produto 15">
                 </div>
             </div>
-            <button class="info-button">Informações do Produto</button>
+            <a href="https://rafael-moratti.github.io/historyone/" class="info-button" style="text-decoration: none; display: inline-block; padding: 8px 16px; background-color: #f0f0f0; border: 1px solid #ccc; border-radius: 4px; cursor: pointer;">Inicio da terceira Historia</a>
         </div>
     </main>
 
@@ -253,12 +258,14 @@
 
     <div class="info-modal">
         <span class="close-modal">&times;</span>
-        <h2>Informações do Produto</h2>
+        <a href="https://rafael-moratti.github.io/historyone/">
+            <h2>Iniciar a Historia</h2>
+        </a>
         <p>Descrição detalhada do produto selecionado.</p>
     </div>
 
     <footer>
-        <p>Contato: info@cabelotododia.com | Telefone: (XX) XXXX-XXXX</p>
+        <p>Contato: Antissocial@cabelotododia.com | Telefone: (XX) XXXX-XXXX</p>
     </footer>
 
     <script>
